@@ -851,6 +851,8 @@
       .cta-card { padding: 36px 24px; }
       .cta-btn { padding: 18px 36px; font-size: 15px; }
       .nav__back { display: none; }
+      /* Mobile: stack problem stats and how-it-works grids */
+      section > div[style*="grid-template-columns:repeat(3"] { grid-template-columns: 1fr !important; }
     }
     @media (max-width: 420px) {
       .stats-row { grid-template-columns: 1fr; }
@@ -899,13 +901,79 @@
   <!-- PAGE HEADER -->
   <section class="page-header">
     <div class="page-header__inner">
-      <div class="page-header__badge">Free Instant Comparison</div>
+      <div class="page-header__badge">The Smarter Way To Go Solar</div>
       <h1 class="page-header__title">
-        See What Solar <em>Actually Costs</em> Over 25 Years
+        The Best Way To Go Solar <em>in 2026</em>
       </h1>
       <p class="page-header__sub">
-        The average homeowner saves $28,000 over 25 years by switching to ownership. See your numbers.
+        Most homeowners overpay by $28,000+ because of hidden commissions and escalating PPA contracts. There's a smarter path &mdash; and it starts with seeing your real numbers.
       </p>
+    </div>
+  </section>
+
+  <!-- VIDEO SECTION -->
+  <section style="max-width:700px; margin:0 auto; padding:0 28px 40px;">
+    <div style="position:relative; border-radius:16px; overflow:hidden; background:var(--dark-3); border:1px solid var(--dark-5); aspect-ratio:9/16; max-height:600px; margin:0 auto;">
+      <video id="funnel-video" width="100%" height="100%" style="object-fit:cover;" controls playsinline poster="">
+        <source src="solar-video/out/solar-video.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+      </video>
+    </div>
+  </section>
+
+  <!-- PROBLEM STATS -->
+  <section style="max-width:1100px; margin:0 auto; padding:0 28px 48px;">
+    <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:16px;">
+      <div style="background:var(--dark-3); border:1px solid var(--red-border); border-radius:12px; padding:28px 20px; text-align:center;">
+        <div style="font-family:var(--font-display); font-size:36px; font-weight:800; color:var(--red-light);">$73,000+</div>
+        <div style="font-family:var(--font-body); font-size:14px; color:var(--gray-500); margin-top:8px;">What the average PPA costs over 25 years</div>
+      </div>
+      <div style="background:var(--dark-3); border:1px solid rgba(243,156,18,0.25); border-radius:12px; padding:28px 20px; text-align:center;">
+        <div style="font-family:var(--font-display); font-size:36px; font-weight:800; color:var(--amber-light);">$8K&ndash;$15K</div>
+        <div style="font-family:var(--font-body); font-size:14px; color:var(--gray-500); margin-top:8px;">Hidden commissions baked into your price</div>
+      </div>
+      <div style="background:var(--dark-3); border:1px solid var(--green-border); border-radius:12px; padding:28px 20px; text-align:center;">
+        <div style="font-family:var(--font-display); font-size:36px; font-weight:800; color:var(--green-light);">5 Years</div>
+        <div style="font-family:var(--font-body); font-size:14px; color:var(--gray-500); margin-top:8px;">To full ownership with our program</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section style="max-width:1100px; margin:0 auto; padding:0 28px 48px;">
+    <div style="text-align:center; margin-bottom:32px;">
+      <div style="font-family:var(--font-body); font-size:13px; font-weight:600; color:var(--green); letter-spacing:2px; text-transform:uppercase;">How It Works</div>
+      <h2 style="font-family:var(--font-display); font-size:32px; font-weight:700; color:var(--white); margin-top:8px;">Three Steps to Owning Your Solar</h2>
+    </div>
+    <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:20px;">
+      <div style="background:var(--dark-3); border:1px solid var(--dark-5); border-radius:12px; padding:28px 24px;">
+        <div style="font-family:var(--font-body); font-size:32px; font-weight:800; color:var(--green); margin-bottom:12px;">01</div>
+        <div style="font-family:var(--font-body); font-size:18px; font-weight:600; color:var(--white); margin-bottom:8px;">Get 30&ndash;40% Off The Top</div>
+        <div style="font-family:var(--font-body); font-size:14px; color:var(--gray-500); line-height:1.6;">Federal tax credits, domestic content bonuses, and energy community credits reduce your system cost before financing.</div>
+      </div>
+      <div style="background:var(--dark-3); border:1px solid var(--dark-5); border-radius:12px; padding:28px 24px;">
+        <div style="font-family:var(--font-body); font-size:32px; font-weight:800; color:var(--green); margin-bottom:12px;">02</div>
+        <div style="font-family:var(--font-body); font-size:18px; font-weight:600; color:var(--white); margin-bottom:8px;">Lock In a Fixed Payment</div>
+        <div style="font-family:var(--font-body); font-size:14px; color:var(--gray-500); line-height:1.6;">No escalator. Same price month 1 and month 300. You always know what you're paying.</div>
+      </div>
+      <div style="background:var(--dark-3); border:1px solid var(--dark-5); border-radius:12px; padding:28px 24px;">
+        <div style="font-family:var(--font-body); font-size:32px; font-weight:800; color:var(--green); margin-bottom:12px;">03</div>
+        <div style="font-family:var(--font-body); font-size:18px; font-weight:600; color:var(--white); margin-bottom:8px;">Own It In 5 Years</div>
+        <div style="font-family:var(--font-body); font-size:14px; color:var(--gray-500); line-height:1.6;">After 5 years, ownership documents transfer to you. The system is yours. Free and clear.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ADDRESS LOOKUP -->
+  <section style="max-width:700px; margin:0 auto; padding:0 28px 48px;">
+    <div style="background:linear-gradient(135deg, rgba(46,204,113,0.08), rgba(46,204,113,0.02)); border:1px solid var(--green-border); border-radius:16px; padding:36px 32px; text-align:center;">
+      <h3 style="font-family:var(--font-display); font-size:26px; font-weight:700; color:var(--white); margin-bottom:8px;">Does Your Area Qualify for Up to 40% Off?</h3>
+      <p style="font-family:var(--font-body); font-size:15px; color:var(--gray-400); margin-bottom:24px;">Enter your address to check if you're in an energy community &mdash; which could unlock an additional 10% credit.</p>
+      <div style="display:flex; gap:12px;">
+        <input type="text" id="address-lookup" placeholder="Enter your address..." style="flex:1; padding:14px 18px; background:var(--dark-2); border:1px solid var(--dark-5); border-radius:10px; color:var(--white); font-family:var(--font-body); font-size:15px; outline:none;">
+        <a href="https://energycommunities.gov/energy-community-tax-credit-bonus/" target="_blank" rel="noopener" style="padding:14px 24px; background:var(--green); color:var(--dark); font-family:var(--font-body); font-size:15px; font-weight:700; border-radius:10px; text-decoration:none; white-space:nowrap; border:none; cursor:pointer;">Check Now &rarr;</a>
+      </div>
+      <p style="font-family:var(--font-body); font-size:12px; color:var(--gray-600); margin-top:12px;">Opens the official DOE Energy Community eligibility tool.</p>
     </div>
   </section>
 
@@ -913,9 +981,9 @@
   <section class="calc-section" id="calculator">
     <div class="calc-section__inner">
       <div class="calc-section__label">Solar Cost Calculator</div>
-      <h2 class="calc-section__title">Your Deal vs Our Deal</h2>
+      <h2 class="calc-section__title">Compare Your Quotes</h2>
       <p class="calc-section__sub">
-        Enter your current solar setup and see how our ownership option compares.
+        Enter your current solar deal and see what you'd pay with our ownership program instead.
       </p>
 
       <div class="calc-card">
@@ -1182,19 +1250,50 @@
     </div>
   </section>
 
-  <!-- CTA -->
+  <!-- DUAL CTA -->
   <section class="cta-section" id="cta-section" style="display:none;">
     <div class="cta-section__inner">
       <div class="cta-card">
-        <div class="cta-card__label">Next Step</div>
-        <h2 class="cta-card__title">Ready To See Your Full Custom Proposal?</h2>
+        <div class="cta-card__label">Ready To Own Your Solar?</div>
+        <h2 class="cta-card__title">Get a Commission-Free Proposal</h2>
         <p class="cta-card__sub">
-          We'll design a system for your specific roof and usage &mdash; with exact pricing from Solargraf, not estimates. No cost, no obligation.
+          We'll design a system for your specific roof and usage &mdash; with real pricing, no inflated commissions. See every credit and program you qualify for.
         </p>
         <a href="https://getmoresolarquotes.com/submit" class="cta-btn" id="cta-link">
-          Request My Free Solar Proposal &rarr;
+          Request My Free Proposal &rarr;
         </a>
-        <a href="index.html" class="cta-secondary">Or go back to learn more</a>
+        <a href="#calculator" class="cta-secondary">Or compare your quotes above</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section style="max-width:800px; margin:0 auto; padding:48px 28px;">
+    <div style="text-align:center; margin-bottom:32px;">
+      <div style="font-family:var(--font-body); font-size:13px; font-weight:600; color:var(--green); letter-spacing:2px; text-transform:uppercase;">Common Questions</div>
+      <h2 style="font-family:var(--font-display); font-size:28px; font-weight:700; color:var(--white); margin-top:8px;">Straight Answers</h2>
+    </div>
+
+    <div style="display:flex; flex-direction:column; gap:16px;">
+      <div style="background:var(--dark-3); border:1px solid var(--dark-5); border-radius:12px; padding:24px;">
+        <div style="font-family:var(--font-body); font-size:17px; font-weight:600; color:var(--white); margin-bottom:8px;">Is this too good to be true?</div>
+        <div style="font-family:var(--font-body); font-size:14px; color:var(--gray-400); line-height:1.7;">No. These are federal programs &mdash; the 30% ITC, domestic content bonuses, and energy community credits. They exist right now. We just help you access them and make sure the savings go to you, not a sales rep.</div>
+      </div>
+      <div style="background:var(--dark-3); border:1px solid var(--dark-5); border-radius:12px; padding:24px;">
+        <div style="font-family:var(--font-body); font-size:17px; font-weight:600; color:var(--white); margin-bottom:8px;">Why don't other companies do this?</div>
+        <div style="font-family:var(--font-body); font-size:14px; color:var(--gray-400); line-height:1.7;">They make more money the other way. Commissions of $8,000&ndash;$15,000 per deal are standard in the industry. Our model cuts those out and passes the savings to you.</div>
+      </div>
+      <div style="background:var(--dark-3); border:1px solid var(--dark-5); border-radius:12px; padding:24px;">
+        <div style="font-family:var(--font-body); font-size:17px; font-weight:600; color:var(--white); margin-bottom:8px;">What happens after 5 years?</div>
+        <div style="font-family:var(--font-body); font-size:14px; color:var(--gray-400); line-height:1.7;">You receive ownership documents and the system is fully yours. Your fixed monthly payment continues through the loan term, but you own the asset. After payoff, your electricity is essentially free.</div>
+      </div>
+      <div style="background:var(--dark-3); border:1px solid var(--dark-5); border-radius:12px; padding:24px;">
+        <div style="font-family:var(--font-body); font-size:17px; font-weight:600; color:var(--white); margin-bottom:8px;">What if I already have a PPA?</div>
+        <div style="font-family:var(--font-body); font-size:14px; color:var(--gray-400); line-height:1.7;">We can still help. Use the calculator above to see exactly what your PPA is costing you over 25 years, and compare it against our ownership program. Many homeowners are surprised by the difference.</div>
+      </div>
+      <div style="background:var(--dark-3); border:1px solid var(--dark-5); border-radius:12px; padding:24px;">
+        <div style="font-family:var(--font-body); font-size:17px; font-weight:600; color:var(--white); margin-bottom:8px;">How do I know if I'm in an energy community?</div>
+        <div style="font-family:var(--font-body); font-size:14px; color:var(--gray-400); line-height:1.7;">Use the address lookup tool above &mdash; it links directly to the Department of Energy's official eligibility checker. If you qualify, you could get an additional 10% credit on top of the standard 30%.</div>
       </div>
     </div>
   </section>
@@ -1202,8 +1301,8 @@
   <!-- DISCLAIMERS -->
   <div class="disclaimers" id="disclaimers" style="display:none;">
     <div class="disclaimers__inner">
-      <p>Illustrative example at 2.9% annual escalation. Actual escalation rates vary by agreement and provider. Some agreements may offer flat-rate PPAs at a premium starting rate.</p>
-      <p>The 30% federal solar investment tax credit (ITC) is available for qualifying residential solar energy systems. Consult your tax professional to determine your eligibility and the applicable credit amount.</p>
+      <p>Commission estimates ($8,000&ndash;$15,000) are based on industry-reported dealer fees and sales commissions for residential solar installations in California. Actual commissions vary by company, system size, and sales channel.</p>
+      <p>Special programs include federal tax credits (ITC), domestic content bonuses, and energy community credits. Availability and amounts vary by location, system specs, and component sourcing. The leasing company claims credits and passes the majority back to the homeowner as a reduced loan amount. Consult your tax professional for eligibility.</p>
       <p>This calculator provides illustrative comparisons based on estimated system size and representative pricing for California. Actual costs vary by system design, roof conditions, utility provider, equipment selection, installation company, and borrower qualification. This tool does not constitute financial, tax, or legal advice. All figures are estimates intended for educational comparison only.</p>
     </div>
   </div>
