@@ -890,27 +890,41 @@
       <div class="calc-card">
         <form id="calc-form" onsubmit="return false;">
           <div class="form-group">
-            <label class="form-label" for="bill">Average Monthly Electric Bill</label>
+            <label class="form-label" for="system-cost">Total System Cost <span>(before incentives)</span></label>
             <div class="input-wrap">
               <span class="input-prefix">$</span>
-              <input class="form-input form-input--dollar" type="number" id="bill" name="bill"
-                     placeholder="250" min="50" max="2000" step="10" required>
+              <input class="form-input form-input--dollar" type="number" id="system-cost" name="system_cost"
+                     placeholder="38,232" min="5000" max="200000" step="1" value="38232" required>
             </div>
           </div>
           <div class="form-group">
-            <label class="form-label" for="system-size">System Size in kW <span>(optional &mdash; auto-estimated from bill)</span></label>
-            <input class="form-input" type="number" id="system-size" name="system_size"
-                   placeholder="Auto-estimated" min="2" max="30" step="0.1">
+            <label class="form-label" for="discount">Incentive / Discount Amount</label>
+            <div class="input-wrap">
+              <span class="input-prefix">$</span>
+              <input class="form-input form-input--dollar" type="number" id="discount" name="discount"
+                     placeholder="16,260.55" min="0" max="200000" step="0.01" value="16260.55" required>
+            </div>
           </div>
           <div class="form-group">
-            <label class="checkbox-group" for="battery">
-              <input type="checkbox" id="battery" name="battery">
-              <span class="checkbox-mark"></span>
-              <span class="checkbox-label">
-                Include Battery Storage
-                <small>10 kWh battery &mdash; $15,000 before tax credit</small>
-              </span>
-            </label>
+            <label class="form-label" for="apr">Interest Rate (APR %)</label>
+            <div class="input-wrap">
+              <span class="input-prefix">%</span>
+              <input class="form-input form-input--dollar" type="number" id="apr" name="apr"
+                     placeholder="8.79" min="0" max="30" step="0.01" value="8.79" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="loan-term">Loan Term <span>(months)</span></label>
+            <input class="form-input" type="number" id="loan-term" name="loan_term"
+                   placeholder="300" min="12" max="600" step="1" value="300" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="bill">Average Monthly Electric Bill <span>(for PPA comparison)</span></label>
+            <div class="input-wrap">
+              <span class="input-prefix">$</span>
+              <input class="form-input form-input--dollar" type="number" id="bill" name="bill"
+                     placeholder="250" min="50" max="2000" step="10">
+            </div>
           </div>
           <button type="button" class="calc-submit" id="calc-btn" onclick="runCalculator()">
             Calculate My Solar Savings &rarr;
@@ -1009,23 +1023,23 @@
             </div>
             <div class="compare-card__row">
               <span class="compare-card__row-label">Loan Term</span>
-              <span class="compare-card__row-value" id="own-term">60 months</span>
+              <span class="compare-card__row-value" id="own-term">—</span>
             </div>
             <div class="compare-card__row">
-              <span class="compare-card__row-label">After Payoff</span>
-              <span class="compare-card__row-value" style="color: var(--green);">$0/mo</span>
+              <span class="compare-card__row-label">APR</span>
+              <span class="compare-card__row-value" id="own-apr">—</span>
             </div>
             <div class="compare-card__row">
-              <span class="compare-card__row-label">40% Prepaid Offset</span>
-              <span class="compare-card__row-value" id="own-prepaid">—</span>
+              <span class="compare-card__row-label">Incentive / Discount</span>
+              <span class="compare-card__row-value" id="own-discount">—</span>
             </div>
             <div class="compare-card__row">
               <span class="compare-card__row-label">Amount Financed</span>
               <span class="compare-card__row-value" id="own-financed">—</span>
             </div>
             <div class="compare-card__row">
-              <span class="compare-card__row-label">Ownership</span>
-              <span class="compare-card__row-value" style="color: var(--green);">~5 Years</span>
+              <span class="compare-card__row-label">Total Interest Paid</span>
+              <span class="compare-card__row-value" id="own-interest">—</span>
             </div>
             <div class="compare-card__total">
               <span class="compare-card__total-label">25-Year Total</span>
@@ -1156,26 +1170,24 @@
      Edit these values to update all calculations site-wide.
      ================================================================= */
   const CONFIG = {
-    // System pricing
-    costPerWatt: 4.40,            // $/watt — base system cost
-    batteryCost: 15000,           // $ per battery unit
-    batteryKwh: 10,               // kWh per battery unit
+    // === DEFAULT VALUES (used when user doesn't override) ===
+    defaultSystemCost: 38232,       // $ total system cost before incentives
+    defaultDiscount: 16260.55,      // $ incentive/discount amount
+    defaultApr: 8.79,               // % annual percentage rate
+    defaultLoanTermMonths: 300,     // 25 years (300 months)
 
-    // Incentives
-    taxCreditRate: 0.30,          // 30% federal ITC
-
-    // Flat-rate ownership model
-    prepaidOffset: 0.40,          // 40% covered upfront by provider
-    loanRate: 0.075,              // 7.5% APR flat rate
-    loanTermMonths: 60,           // 5-year payoff
+    // System pricing (for auto-estimate from bill)
+    costPerWatt: 4.50,              // $/watt — base system cost
+    batteryCost: 13500,             // $ per battery unit
+    batteryKwh: 10,                 // kWh per battery unit
 
     // Escalating PPA model
-    ppaEscalatorRate: 0.029,      // 2.9% annual increase
-    ppaTermYears: 25,             // 25-year agreement
+    ppaEscalatorRate: 0.029,        // 2.9% annual increase
+    ppaTermYears: 25,               // 25-year agreement
 
     // System sizing from bill
-    avgCostPerKwh: 0.20,          // California avg $/kWh
-    kwhPerKwYear: 1500,           // Annual production per kW installed
+    avgCostPerKwh: 0.20,            // California avg $/kWh
+    kwhPerKwYear: 1500,             // Annual production per kW installed
 
     // Pricing tiers — PPA year-1 monthly by system size
     tiers: [
@@ -1199,20 +1211,13 @@
   function estimateSystemSize(monthlyBill) {
     const annualKwh = (monthlyBill / CONFIG.avgCostPerKwh) * 12;
     const kw = annualKwh / CONFIG.kwhPerKwYear;
-    return Math.round(kw * 10) / 10; // round to 1 decimal
-  }
-
-  function getSystemCost(kw, includeBattery) {
-    let cost = kw * CONFIG.costPerWatt * 1000; // kW to watts
-    if (includeBattery) cost += CONFIG.batteryCost;
-    return Math.round(cost);
+    return Math.round(kw * 10) / 10;
   }
 
   function getPpaTier(kw) {
     for (const tier of CONFIG.tiers) {
       if (kw >= tier.minKw && kw <= tier.maxKw) return tier.ppaMo;
     }
-    // Fallback: use last tier if above range
     return CONFIG.tiers[CONFIG.tiers.length - 1].ppaMo;
   }
 
@@ -1229,6 +1234,7 @@
     return payments;
   }
 
+  // Standard amortization: M = P * [r(1+r)^n] / [(1+r)^n - 1]
   function calcMonthlyPayment(principal, annualRate, months) {
     if (principal <= 0) return 0;
     const r = annualRate / 12;
@@ -1236,52 +1242,68 @@
     return principal * (r * Math.pow(1 + r, months)) / (Math.pow(1 + r, months) - 1);
   }
 
-  function runComparison(monthlyBill, systemKwOverride, includeBattery) {
-    const systemKw = systemKwOverride || estimateSystemSize(monthlyBill);
-    const systemCost = getSystemCost(systemKw, includeBattery);
-    const taxCredit = Math.round(systemCost * CONFIG.taxCreditRate);
-    const prepaidAmount = Math.round(systemCost * CONFIG.prepaidOffset);
-    const financedAmount = systemCost - prepaidAmount;
-
-    // PPA calculations
-    const ppaStart = getPpaTier(systemKw);
-    const ppaPayments = calcPpaYearlyPayments(ppaStart, CONFIG.ppaTermYears, CONFIG.ppaEscalatorRate);
-    const ppaTotal = ppaPayments.reduce((sum, p) => sum + p.annual, 0);
-
+  function runComparison(systemCost, discount, aprPercent, loanTermMonths, monthlyBill) {
     // Ownership calculations
-    const ownMonthly = calcMonthlyPayment(financedAmount, CONFIG.loanRate, CONFIG.loanTermMonths);
-    const ownTotalPayments = ownMonthly * CONFIG.loanTermMonths;
-    const loanTermYears = CONFIG.loanTermMonths / 12;
+    const priceAfterIncentives = systemCost - discount;
+    const apr = aprPercent / 100;
+    const ownMonthly = calcMonthlyPayment(priceAfterIncentives, apr, loanTermMonths);
+    const totalAmountPaid = ownMonthly * loanTermMonths;
+    const totalInterest = totalAmountPaid - priceAfterIncentives;
+    const loanTermYears = Math.ceil(loanTermMonths / 12);
 
-    // Build ownership year-by-year
+    // Build ownership year-by-year (for chart + table)
     const ownPayments = [];
-    for (let y = 1; y <= CONFIG.ppaTermYears; y++) {
-      const monthly = y <= loanTermYears ? ownMonthly : 0;
+    const displayYears = Math.max(loanTermYears, CONFIG.ppaTermYears);
+    for (let y = 1; y <= displayYears; y++) {
+      const monthsThisYear = Math.min(12, Math.max(0, loanTermMonths - (y - 1) * 12));
+      const monthly = monthsThisYear > 0 ? ownMonthly : 0;
+      const annual = monthly * monthsThisYear;
       ownPayments.push({
         year: y,
         monthly: Math.round(monthly * 100) / 100,
-        annual: Math.round(monthly * 12 * 100) / 100,
+        annual: Math.round(annual * 100) / 100,
       });
     }
 
-    const ownTotal = ownPayments.reduce((sum, p) => sum + p.annual, 0);
-    const totalSavings = Math.round(ppaTotal - ownTotal);
+    // PPA calculations (if bill provided)
+    let systemKw = null;
+    let ppaStart = 0;
+    let ppaPayments = [];
+    let ppaTotal = 0;
+
+    if (monthlyBill && monthlyBill > 0) {
+      systemKw = estimateSystemSize(monthlyBill);
+      ppaStart = getPpaTier(systemKw);
+      ppaPayments = calcPpaYearlyPayments(ppaStart, displayYears, CONFIG.ppaEscalatorRate);
+      ppaTotal = ppaPayments.reduce((sum, p) => sum + p.annual, 0);
+    } else {
+      // No bill — create empty PPA data so chart/table still work
+      for (let y = 1; y <= displayYears; y++) {
+        ppaPayments.push({ year: y, monthly: 0, annual: 0 });
+      }
+    }
+
+    const ownTotal = Math.round(totalAmountPaid);
+    const totalSavings = ppaTotal > 0 ? Math.round(ppaTotal - ownTotal) : 0;
 
     return {
-      systemKw,
       systemCost,
-      taxCredit,
-      prepaidAmount,
-      financedAmount,
+      discount,
+      priceAfterIncentives: Math.round(priceAfterIncentives * 100) / 100,
+      aprPercent,
+      loanTermMonths,
+      loanTermYears,
+      systemKw,
       ppaStart,
       ppaPayments,
       ppaTotal: Math.round(ppaTotal),
       ownMonthly: Math.round(ownMonthly * 100) / 100,
       ownPayments,
-      ownTotal: Math.round(ownTotal),
+      ownTotal,
+      totalInterest: Math.round(totalInterest),
       totalSavings,
-      includeBattery,
-      isEstimated: !systemKwOverride,
+      hasPpa: monthlyBill && monthlyBill > 0,
+      displayYears,
     };
   }
 
@@ -1546,25 +1568,44 @@
   function buildTable(data) {
     const tbody = document.getElementById('table-body');
     tbody.innerHTML = '';
-    let cumulativeSavings = 0;
+    let cumulativeOwn = 0;
+    let cumulativePpa = 0;
 
-    for (let i = 0; i < 25; i++) {
-      const ppa = data.ppaPayments[i];
+    // Update table headers based on whether PPA is shown
+    const thead = document.querySelector('.data-table thead tr');
+    if (data.hasPpa) {
+      thead.innerHTML = '<th>Year</th><th>PPA Monthly</th><th>PPA Annual</th><th>Ownership Monthly</th><th>Ownership Annual</th><th>Cumulative Savings</th>';
+    } else {
+      thead.innerHTML = '<th>Year</th><th>Monthly Payment</th><th>Annual Payment</th><th>Cumulative Paid</th>';
+    }
+
+    for (let i = 0; i < data.displayYears; i++) {
       const own = data.ownPayments[i];
-      const yearSavings = ppa.annual - own.annual;
-      cumulativeSavings += yearSavings;
+      cumulativeOwn += own.annual;
 
       const tr = document.createElement('tr');
       if (i >= 5) tr.className = 'row-hidden';
       if (own.monthly === 0) tr.classList.add('row-zero');
 
-      tr.innerHTML =
-        '<td>' + (i + 1) + '</td>' +
-        '<td class="val-red">' + fmtMo(ppa.monthly) + '</td>' +
-        '<td class="val-red">' + fmt(ppa.annual) + '</td>' +
-        '<td class="val-green">' + (own.monthly > 0 ? fmtMo(own.monthly) : '$0/mo') + '</td>' +
-        '<td class="val-green">' + (own.annual > 0 ? fmt(own.annual) : '$0') + '</td>' +
-        '<td class="val-savings">' + fmt(cumulativeSavings) + '</td>';
+      if (data.hasPpa) {
+        const ppa = data.ppaPayments[i];
+        cumulativePpa += ppa.annual;
+        const savings = cumulativePpa - cumulativeOwn;
+
+        tr.innerHTML =
+          '<td>' + (i + 1) + '</td>' +
+          '<td class="val-red">' + fmtMo(ppa.monthly) + '</td>' +
+          '<td class="val-red">' + fmt(ppa.annual) + '</td>' +
+          '<td class="val-green">' + (own.monthly > 0 ? fmtMo(own.monthly) : '$0/mo') + '</td>' +
+          '<td class="val-green">' + (own.annual > 0 ? fmt(own.annual) : '$0') + '</td>' +
+          '<td class="val-savings">' + fmt(savings) + '</td>';
+      } else {
+        tr.innerHTML =
+          '<td>' + (i + 1) + '</td>' +
+          '<td class="val-green">' + (own.monthly > 0 ? fmtMo(own.monthly) : '$0/mo') + '</td>' +
+          '<td class="val-green">' + (own.annual > 0 ? fmt(own.annual) : '$0') + '</td>' +
+          '<td class="val-savings">' + fmt(cumulativeOwn) + '</td>';
+      }
 
       tbody.appendChild(tr);
     }
@@ -1593,40 +1634,52 @@
      ================================================================= */
 
   function runCalculator() {
+    const costInput = document.getElementById('system-cost');
+    const discountInput = document.getElementById('discount');
+    const aprInput = document.getElementById('apr');
+    const termInput = document.getElementById('loan-term');
     const billInput = document.getElementById('bill');
-    const sizeInput = document.getElementById('system-size');
-    const batteryInput = document.getElementById('battery');
 
-    const monthlyBill = parseFloat(billInput.value);
-    if (!monthlyBill || monthlyBill < 50) {
-      billInput.focus();
-      billInput.style.borderColor = 'var(--red)';
-      billInput.style.boxShadow = '0 0 0 3px rgba(231,76,60,0.2)';
-      setTimeout(function() {
-        billInput.style.borderColor = '';
-        billInput.style.boxShadow = '';
-      }, 2000);
+    const systemCost = parseFloat(costInput.value);
+    const discount = parseFloat(discountInput.value);
+    const aprPercent = parseFloat(aprInput.value);
+    const loanTermMonths = parseInt(termInput.value);
+    const monthlyBill = billInput.value ? parseFloat(billInput.value) : null;
+
+    // Validate required fields
+    if (!systemCost || systemCost <= 0) {
+      costInput.focus();
+      costInput.style.borderColor = 'var(--red)';
+      costInput.style.boxShadow = '0 0 0 3px rgba(231,76,60,0.2)';
+      setTimeout(function() { costInput.style.borderColor = ''; costInput.style.boxShadow = ''; }, 2000);
       return;
     }
+    if (isNaN(discount) || discount < 0) {
+      discountInput.focus(); return;
+    }
+    if (!aprPercent || aprPercent <= 0) {
+      aprInput.focus(); return;
+    }
+    if (!loanTermMonths || loanTermMonths <= 0) {
+      termInput.focus(); return;
+    }
 
-    const systemKw = sizeInput.value ? parseFloat(sizeInput.value) : null;
-    const includeBattery = batteryInput.checked;
-
-    const data = runComparison(monthlyBill, systemKw, includeBattery);
+    const data = runComparison(systemCost, discount, aprPercent, loanTermMonths, monthlyBill);
 
     // Populate stats
-    animateValue(document.getElementById('stat-size'), data.systemKw * 10, '', '', 600);
-    setTimeout(function() {
-      document.getElementById('stat-size').textContent = data.systemKw.toFixed(1) + ' kW';
-    }, 650);
-    document.getElementById('stat-size-sub').textContent = data.isEstimated ? 'estimated from bill' : 'custom size';
+    animateValue(document.getElementById('stat-size'), data.priceAfterIncentives, '$', '', 600);
+    document.getElementById('stat-size').parentElement.querySelector('.stat-card__label').textContent = 'PRICE AFTER INCENTIVES';
+    document.getElementById('stat-size-sub').textContent = 'amount financed';
 
     animateValue(document.getElementById('stat-cost'), data.systemCost, '$', '', 800);
-    document.getElementById('stat-cost-sub').textContent =
-      data.includeBattery ? 'includes 10 kWh battery' : 'before incentives';
+    document.getElementById('stat-cost-sub').textContent = 'total system cost';
 
-    animateValue(document.getElementById('stat-credit'), data.taxCredit, '$', '', 800);
-    animateValue(document.getElementById('stat-savings'), data.totalSavings, '$', '', 1000);
+    animateValue(document.getElementById('stat-credit'), data.discount, '$', '', 800);
+    document.getElementById('stat-credit').parentElement.querySelector('.stat-card__label').textContent = 'INCENTIVE / DISCOUNT';
+
+    animateValue(document.getElementById('stat-savings'), data.totalInterest, '$', '', 1000);
+    document.getElementById('stat-savings').parentElement.querySelector('.stat-card__label').textContent = 'TOTAL INTEREST';
+    document.getElementById('stat-savings').parentElement.querySelector('.stat-card__sub').textContent = 'over loan term';
 
     // Stagger stat card animations
     document.querySelectorAll('.stat-card').forEach(function(card, i) {
@@ -1634,32 +1687,53 @@
       card.classList.add('animate-stat');
     });
 
-    // PPA card
-    document.getElementById('ppa-y1').textContent = fmtMo(data.ppaPayments[0].monthly);
-    document.getElementById('ppa-y5').textContent = fmtMo(data.ppaPayments[4].monthly);
-    document.getElementById('ppa-y10').textContent = fmtMo(data.ppaPayments[9].monthly);
-    document.getElementById('ppa-y15').textContent = fmtMo(data.ppaPayments[14].monthly);
-    document.getElementById('ppa-y20').textContent = fmtMo(data.ppaPayments[19].monthly);
-    document.getElementById('ppa-y25').textContent = fmtMo(data.ppaPayments[24].monthly);
-    document.getElementById('ppa-total').textContent = fmt(data.ppaTotal);
+    // PPA card — only populate if bill was provided
+    if (data.hasPpa) {
+      document.getElementById('ppa-y1').textContent = fmtMo(data.ppaPayments[0].monthly);
+      document.getElementById('ppa-y5').textContent = fmtMo(data.ppaPayments[4].monthly);
+      document.getElementById('ppa-y10').textContent = fmtMo(data.ppaPayments[9].monthly);
+      document.getElementById('ppa-y15').textContent = fmtMo(data.ppaPayments[14].monthly);
+      document.getElementById('ppa-y20').textContent = fmtMo(data.ppaPayments[19].monthly);
+      document.getElementById('ppa-y25').textContent = fmtMo(data.ppaPayments[Math.min(24, data.ppaPayments.length - 1)].monthly);
+      document.getElementById('ppa-total').textContent = fmt(data.ppaTotal);
+      document.querySelector('.compare-card--ppa').style.display = '';
+    } else {
+      document.querySelector('.compare-card--ppa').style.display = 'none';
+    }
 
     // Ownership card
     document.getElementById('own-monthly').textContent = fmtMo(data.ownMonthly);
-    document.getElementById('own-prepaid').textContent = fmt(data.prepaidAmount);
-    document.getElementById('own-financed').textContent = fmt(data.financedAmount);
+    document.getElementById('own-term').textContent = data.loanTermMonths + ' months (' + data.loanTermYears + ' yr)';
+    document.getElementById('own-apr').textContent = data.aprPercent + '%';
+    document.getElementById('own-discount').textContent = fmt(data.discount);
+    document.getElementById('own-financed').textContent = fmt(data.priceAfterIncentives);
+    document.getElementById('own-interest').textContent = fmt(data.totalInterest);
     document.getElementById('own-total').textContent = fmt(data.ownTotal);
 
-    // Savings banner
-    animateValue(document.getElementById('savings-amount'), data.totalSavings, '$', '', 1200);
-    document.getElementById('savings-banner').classList.add('savings-banner__pulse');
+    // Savings banner — only show if PPA comparison exists
+    if (data.hasPpa && data.totalSavings > 0) {
+      animateValue(document.getElementById('savings-amount'), data.totalSavings, '$', '', 1200);
+      document.getElementById('savings-banner').classList.add('savings-banner__pulse');
+      document.getElementById('savings-banner').style.display = '';
+    } else {
+      // Show total amount paid instead
+      document.getElementById('savings-amount').textContent = fmt(data.ownTotal);
+      document.querySelector('.savings-banner__text').textContent = 'total amount paid over ' + data.loanTermYears + ' years (principal + interest)';
+      document.getElementById('savings-banner').style.display = '';
+    }
 
-    // Tax credit
-    document.getElementById('tax-credit-val').textContent = fmt(data.taxCredit);
+    // Tax credit callout — update with discount info
+    document.getElementById('tax-credit-val').textContent = fmt(data.discount);
+    document.querySelector('.tax-callout__text').innerHTML =
+      'Your <strong>' + fmt(data.discount) + ' incentive/discount</strong> reduces the financed amount from ' +
+      fmt(data.systemCost) + ' to <strong>' + fmt(data.priceAfterIncentives) + '</strong>. ' +
+      'At ' + data.aprPercent + '% APR over ' + data.loanTermMonths + ' months, your fixed monthly payment is <strong>' + fmtMo(data.ownMonthly) + '</strong>.' +
+      '<small>Consult your tax professional regarding solar tax credit eligibility. This is not tax advice.</small>';
 
     // Build table
     buildTable(data);
     tableExpanded = false;
-    document.getElementById('table-toggle').innerHTML = 'Show All 25 Years &#9660;';
+    document.getElementById('table-toggle').innerHTML = 'Show All ' + data.displayYears + ' Years &#9660;';
 
     // Show results
     const results = document.getElementById('results');
@@ -1687,10 +1761,10 @@
 
     // Update CTA link with params
     const ctaUrl = CONFIG.ghlFunnelUrl +
-      '?bill=' + encodeURIComponent(monthlyBill) +
-      '&size=' + encodeURIComponent(data.systemKw) +
-      '&cost=' + encodeURIComponent(data.systemCost) +
-      '&savings=' + encodeURIComponent(data.totalSavings);
+      '?cost=' + encodeURIComponent(data.systemCost) +
+      '&financed=' + encodeURIComponent(data.priceAfterIncentives) +
+      '&monthly=' + encodeURIComponent(data.ownMonthly) +
+      '&term=' + encodeURIComponent(data.loanTermMonths);
     document.getElementById('cta-link').href = ctaUrl;
   }
 
