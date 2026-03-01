@@ -1008,51 +1008,6 @@
             </div>
           </div>
 
-          <!-- Divider -->
-          <div style="height:1px; background:linear-gradient(90deg, transparent, rgba(46,204,113,0.3), transparent); margin:28px 0;"></div>
-
-          <!-- Ownership Alternative (always shown) -->
-          <div class="form-section-label" style="color:var(--green-light);">Our Ownership Alternative</div>
-          <div class="form-group">
-            <label class="form-label" for="system-cost">Total System Cost <span>(before incentives)</span></label>
-            <div class="input-wrap">
-              <span class="input-prefix">$</span>
-              <input class="form-input form-input--dollar" type="number" id="system-cost" name="system_cost"
-                     placeholder="38,232" min="5000" max="200000" step="1" value="38232" required>
-            </div>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="discount">Incentive / Discount Amount</label>
-            <div class="input-wrap">
-              <span class="input-prefix">$</span>
-              <input class="form-input form-input--dollar" type="number" id="discount" name="discount"
-                     placeholder="16,260.55" min="0" max="200000" step="0.01" value="16260.55" required>
-            </div>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="apr">Interest Rate (APR %)</label>
-            <div class="input-wrap">
-              <span class="input-prefix">%</span>
-              <input class="form-input form-input--dollar" type="number" id="apr" name="apr"
-                     placeholder="8.79" min="0" max="30" step="0.01" value="8.79" required>
-            </div>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="loan-term">Loan Term <span>(months)</span></label>
-            <input class="form-input" type="number" id="loan-term" name="loan_term"
-                   placeholder="300" min="12" max="600" step="1" value="300" required>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="own-batteries">Number of Batteries</label>
-            <input class="form-input" type="number" id="own-batteries" name="own_batteries"
-                   placeholder="0" min="0" max="20" step="1" value="0">
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="own-battery-kwh">Battery Size <span>(kWh each)</span></label>
-            <input class="form-input" type="number" id="own-battery-kwh" name="own_battery_kwh"
-                   placeholder="10" min="1" max="50" step="0.1" value="10">
-          </div>
-
           <button type="button" class="calc-submit" id="calc-btn" onclick="runCalculator()">
             Compare &amp; Calculate &rarr;
           </button>
@@ -1663,25 +1618,13 @@
       setTimeout(function() { el.style.borderColor = ''; el.style.boxShadow = ''; }, 2000);
     }
 
-    // ── Read ownership ("our deal") inputs ──
-    const costInput = document.getElementById('system-cost');
-    const discountInput = document.getElementById('discount');
-    const ownAprInput = document.getElementById('apr');
-    const ownTermInput = document.getElementById('loan-term');
-
-    const systemCost = parseFloat(costInput.value);
-    const discount = parseFloat(discountInput.value);
-    const ownAprPercent = parseFloat(ownAprInput.value);
-    const ownTermMonths = parseInt(ownTermInput.value);
-
-    // Validate ownership fields
-    if (!systemCost || systemCost <= 0) { flashError(costInput); return; }
-    if (isNaN(discount) || discount < 0) { flashError(discountInput); return; }
-    if (!ownAprPercent || ownAprPercent <= 0) { flashError(ownAprInput); return; }
-    if (!ownTermMonths || ownTermMonths <= 0) { flashError(ownTermInput); return; }
-
-    var ownBatteries = parseInt(document.getElementById('own-batteries').value) || 0;
-    var ownBatteryKwh = parseFloat(document.getElementById('own-battery-kwh').value) || 10;
+    // ── Ownership ("our deal") — uses CONFIG defaults ──
+    var systemCost = CONFIG.defaultSystemCost;
+    var discount = CONFIG.defaultDiscount;
+    var ownAprPercent = CONFIG.defaultApr;
+    var ownTermMonths = CONFIG.defaultLoanTermMonths;
+    var ownBatteries = 0;
+    var ownBatteryKwh = CONFIG.batteryKwh;
 
     // ── Calculate ownership ("our deal") ──
     var priceAfterIncentives = systemCost - discount;
