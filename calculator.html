@@ -239,6 +239,11 @@
     }
     .form-group { margin-bottom: 22px; }
     .form-group:last-of-type { margin-bottom: 0; }
+    .form-section-label {
+      font-size: 12px; font-weight: 700; color: var(--red-light);
+      text-transform: uppercase; letter-spacing: 2px;
+      margin-bottom: 18px; margin-top: 4px;
+    }
     .form-label {
       display: block; font-size: 13px; font-weight: 600;
       color: var(--gray-400); margin-bottom: 8px;
@@ -860,21 +865,8 @@
         See What Solar <em>Actually Costs</em> Over 25 Years
       </h1>
       <p class="page-header__sub">
-        Enter your electric bill below. We'll show you the real difference between a standard escalating PPA and a flat-rate ownership structure &mdash; with your numbers, not theirs.
+        Enter your current PPA details and see how much you'd save by switching to ownership.
       </p>
-    </div>
-  </section>
-
-  <!-- VIDEO -->
-  <section class="video-section">
-    <div class="video-section__inner">
-      <div class="video-frame" id="video-container">
-        <div class="video-ph" onclick="this.innerHTML='<iframe src=\'https://www.youtube.com/embed/YOUR_VIDEO_ID?autoplay=1&rel=0\' allowfullscreen allow=\'autoplay\'></iframe>'">
-          <div class="video-ph__play"></div>
-          <div class="video-ph__label">The 60-Second Math Breakdown</div>
-          <div class="video-ph__time">1:02 &middot; Click to play</div>
-        </div>
-      </div>
     </div>
   </section>
 
@@ -882,9 +874,9 @@
   <section class="calc-section" id="calculator">
     <div class="calc-section__inner">
       <div class="calc-section__label">Solar Cost Calculator</div>
-      <h2 class="calc-section__title">Run Your Numbers</h2>
+      <h2 class="calc-section__title">PPA vs Ownership</h2>
       <p class="calc-section__sub">
-        Enter your average monthly electric bill. We'll estimate system size and show you a side-by-side 25-year cost comparison.
+        Enter your current PPA details and compare against buying the system outright.
       </p>
 
       <div class="calc-card">
@@ -1046,7 +1038,7 @@
               <span class="compare-card__total-value" id="own-total">—</span>
             </div>
           </div>
-          <div class="compare-card__footer">You own the system in ~5 years</div>
+          <div class="compare-card__footer" id="own-footer">You own the system after payoff</div>
         </div>
       </div>
 
@@ -1067,13 +1059,13 @@
 
       <!-- Chart -->
       <div class="chart-section">
-        <h3 class="chart-section__title">Monthly Payment Over 25 Years</h3>
-        <p class="chart-section__sub">Red keeps rising. Green stays flat — then drops to zero.</p>
+        <h3 class="chart-section__title" id="chart-title">Monthly Payment Over 25 Years</h3>
+        <p class="chart-section__sub" id="chart-sub">Red keeps rising. Green stays flat — then drops to zero.</p>
         <div class="chart-wrap" id="chart-wrap">
           <canvas class="chart-canvas" id="chart-canvas"></canvas>
           <div class="chart-tooltip" id="chart-tooltip">
             <div class="chart-tooltip__year" id="tooltip-year">Year 1</div>
-            <div class="chart-tooltip__row">
+            <div class="chart-tooltip__row" id="tooltip-ppa-row">
               <span class="chart-tooltip__label">PPA</span>
               <span class="chart-tooltip__val--red" id="tooltip-ppa">$0</span>
             </div>
@@ -1082,8 +1074,8 @@
               <span class="chart-tooltip__val--green" id="tooltip-own">$0</span>
             </div>
           </div>
-          <div class="chart-legend">
-            <div class="chart-legend__item">
+          <div class="chart-legend" id="chart-legend">
+            <div class="chart-legend__item" id="chart-legend-ppa">
               <div class="chart-legend__dot chart-legend__dot--red"></div>
               Escalating PPA
             </div>
@@ -1368,8 +1360,10 @@
     const plotH = H - pad.top - pad.bottom;
 
     // Find max value for Y axis
-    const maxPpa = data.ppaPayments[data.ppaPayments.length - 1].monthly;
-    const yMax = Math.ceil(maxPpa / 50) * 50 + 50;
+    const maxPpa = data.hasPpa ? data.ppaPayments[data.ppaPayments.length - 1].monthly : 0;
+    const maxOwn = data.ownMonthly;
+    const maxVal = Math.max(maxPpa, maxOwn);
+    const yMax = Math.ceil(maxVal / 50) * 50 + 50;
 
     function xPos(year) {
       return pad.left + ((year - 1) / 24) * plotW;
@@ -1438,8 +1432,9 @@
       ctx.strokeStyle = 'rgba(255,255,255,0.04)';
       ctx.lineWidth = 1;
       for (let i = 0; i <= 5; i++) {
-        const maxPpa = data.ppaPayments[data.ppaPayments.length - 1].monthly;
-        const yMax = Math.ceil(maxPpa / 50) * 50 + 50;
+        const maxPpa = data.hasPpa ? data.ppaPayments[data.ppaPayments.length - 1].monthly : 0;
+        const maxOwn = data.ownMonthly;
+        const yMax = Math.ceil(Math.max(maxPpa, maxOwn) / 50) * 50 + 50;
         const val = (yMax / 5) * i;
         const y = yPos(val);
         ctx.beginPath();
@@ -1448,8 +1443,8 @@
         ctx.stroke();
       }
 
-      // Draw PPA line (red)
-      if (pointCount >= 1) {
+      // Draw PPA line (red) — only if PPA comparison is active
+      if (pointCount >= 1 && data.hasPpa) {
         ctx.beginPath();
         ctx.strokeStyle = '#e74c3c';
         ctx.lineWidth = 3;
@@ -1677,9 +1672,19 @@
     animateValue(document.getElementById('stat-credit'), data.discount, '$', '', 800);
     document.getElementById('stat-credit').parentElement.querySelector('.stat-card__label').textContent = 'INCENTIVE / DISCOUNT';
 
-    animateValue(document.getElementById('stat-savings'), data.totalInterest, '$', '', 1000);
-    document.getElementById('stat-savings').parentElement.querySelector('.stat-card__label').textContent = 'TOTAL INTEREST';
-    document.getElementById('stat-savings').parentElement.querySelector('.stat-card__sub').textContent = 'over loan term';
+    if (data.hasPpa && data.totalSavings > 0) {
+      animateValue(document.getElementById('stat-savings'), data.totalSavings, '$', '', 1000);
+      document.getElementById('stat-savings').parentElement.querySelector('.stat-card__label').textContent = '25-YEAR SAVINGS';
+      document.getElementById('stat-savings').parentElement.querySelector('.stat-card__sub').textContent = 'vs escalating PPA';
+      document.getElementById('stat-savings').parentElement.classList.add('stat-card--green');
+      document.getElementById('stat-savings').parentElement.classList.remove('stat-card--amber');
+    } else {
+      animateValue(document.getElementById('stat-savings'), data.totalInterest, '$', '', 1000);
+      document.getElementById('stat-savings').parentElement.querySelector('.stat-card__label').textContent = 'TOTAL INTEREST';
+      document.getElementById('stat-savings').parentElement.querySelector('.stat-card__sub').textContent = 'over loan term';
+      document.getElementById('stat-savings').parentElement.classList.add('stat-card--amber');
+      document.getElementById('stat-savings').parentElement.classList.remove('stat-card--green');
+    }
 
     // Stagger stat card animations
     document.querySelectorAll('.stat-card').forEach(function(card, i) {
@@ -1697,8 +1702,12 @@
       document.getElementById('ppa-y25').textContent = fmtMo(data.ppaPayments[Math.min(24, data.ppaPayments.length - 1)].monthly);
       document.getElementById('ppa-total').textContent = fmt(data.ppaTotal);
       document.querySelector('.compare-card--ppa').style.display = '';
+      document.getElementById('compare-cards').style.gridTemplateColumns = '1fr 1fr';
     } else {
       document.querySelector('.compare-card--ppa').style.display = 'none';
+      document.getElementById('compare-cards').style.gridTemplateColumns = '1fr';
+      document.querySelector('.compare-card--own').style.maxWidth = '520px';
+      document.querySelector('.compare-card--own').style.margin = '0 auto';
     }
 
     // Ownership card
@@ -1709,6 +1718,7 @@
     document.getElementById('own-financed').textContent = fmt(data.priceAfterIncentives);
     document.getElementById('own-interest').textContent = fmt(data.totalInterest);
     document.getElementById('own-total').textContent = fmt(data.ownTotal);
+    document.getElementById('own-footer').textContent = 'You own the system after ' + data.loanTermYears + ' years';
 
     // Savings banner — only show if PPA comparison exists
     if (data.hasPpa && data.totalSavings > 0) {
@@ -1753,6 +1763,19 @@
     setTimeout(function() {
       results.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 200);
+
+    // Update chart labels based on mode
+    if (data.hasPpa) {
+      document.getElementById('chart-title').textContent = 'Monthly Payment Over 25 Years';
+      document.getElementById('chart-sub').textContent = 'Red keeps rising. Green stays flat \u2014 then drops to zero.';
+      document.getElementById('tooltip-ppa-row').style.display = '';
+      document.getElementById('chart-legend-ppa').style.display = '';
+    } else {
+      document.getElementById('chart-title').textContent = 'Your Monthly Payment Over Time';
+      document.getElementById('chart-sub').textContent = 'Fixed monthly payment through your loan term.';
+      document.getElementById('tooltip-ppa-row').style.display = 'none';
+      document.getElementById('chart-legend-ppa').style.display = 'none';
+    }
 
     // Draw chart after results are visible
     setTimeout(function() {
