@@ -244,11 +244,44 @@
       text-transform: uppercase; letter-spacing: 2px;
       margin-bottom: 18px; margin-top: 4px;
     }
-    .form-section-label {
-      font-size: 12px; font-weight: 700; color: var(--red-light);
-      text-transform: uppercase; letter-spacing: 2px;
-      margin-bottom: 18px; margin-top: 4px;
+
+    /* Mode Toggle Tabs */
+    .mode-toggle {
+      display: flex; gap: 0;
+      background: var(--dark-4);
+      border-radius: 8px;
+      padding: 4px;
+      margin-bottom: 24px;
     }
+    .mode-toggle__btn {
+      flex: 1;
+      padding: 12px 16px;
+      background: none;
+      border: none;
+      border-radius: 6px;
+      font-family: var(--font-body);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--gray-500);
+      cursor: pointer;
+      transition: all 0.2s;
+      letter-spacing: 0.2px;
+    }
+    .mode-toggle__btn:hover {
+      color: var(--gray-300);
+    }
+    .mode-toggle__btn.active {
+      background: var(--red-dim);
+      color: var(--red-light);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    .mode-toggle__btn.active--green {
+      background: var(--green-dim);
+      color: var(--green-light);
+    }
+    .mode-fields { display: none; }
+    .mode-fields.active { display: block; }
+
     .form-label {
       display: block; font-size: 13px; font-weight: 600;
       color: var(--gray-400); margin-bottom: 8px;
@@ -870,7 +903,7 @@
         See What Solar <em>Actually Costs</em> Over 25 Years
       </h1>
       <p class="page-header__sub">
-        Enter your current PPA details and compare against buying the system outright.
+        Enter your current solar deal and compare it against our ownership alternative.
       </p>
     </div>
   </section>
@@ -879,46 +912,107 @@
   <section class="calc-section" id="calculator">
     <div class="calc-section__inner">
       <div class="calc-section__label">Solar Cost Calculator</div>
-      <h2 class="calc-section__title">PPA vs Ownership</h2>
+      <h2 class="calc-section__title">Your Deal vs Our Deal</h2>
       <p class="calc-section__sub">
-        Enter your current PPA details and compare against buying the system outright.
+        Enter your current solar setup and see how our ownership option compares.
       </p>
 
       <div class="calc-card">
         <form id="calc-form" onsubmit="return false;">
 
-          <!-- PPA Section -->
-          <div class="form-section-label">Your Current PPA</div>
-          <div class="form-group">
-            <label class="form-label" for="ppa-system-size">System Size <span>(kW)</span></label>
-            <div class="input-wrap">
-              <span class="input-prefix" style="font-size:12px;">kW</span>
-              <input class="form-input form-input--dollar" type="number" id="ppa-system-size" name="ppa_system_size"
-                     placeholder="8.5" min="1" max="50" step="0.1" required>
+          <!-- Mode Toggle -->
+          <div class="form-section-label">What's Your Current Solar Setup?</div>
+          <div class="mode-toggle">
+            <button type="button" class="mode-toggle__btn active" id="mode-ppa-btn" onclick="setMode('ppa')">I Have a PPA</button>
+            <button type="button" class="mode-toggle__btn" id="mode-purchase-btn" onclick="setMode('purchase')">I Purchased / Financed</button>
+          </div>
+
+          <!-- PPA Fields -->
+          <div class="mode-fields active" id="ppa-fields">
+            <div class="form-group">
+              <label class="form-label" for="ppa-system-size">System Size <span>(kW)</span></label>
+              <div class="input-wrap">
+                <span class="input-prefix" style="font-size:12px;">kW</span>
+                <input class="form-input form-input--dollar" type="number" id="ppa-system-size" name="ppa_system_size"
+                       placeholder="8.5" min="1" max="50" step="0.1">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="ppa-monthly">Current Monthly PPA Payment</label>
+              <div class="input-wrap">
+                <span class="input-prefix">$</span>
+                <input class="form-input form-input--dollar" type="number" id="ppa-monthly" name="ppa_monthly"
+                       placeholder="185" min="10" max="2000" step="1">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="ppa-escalator">Annual Escalator Rate <span>(%)</span></label>
+              <div class="input-wrap">
+                <span class="input-prefix">%</span>
+                <input class="form-input form-input--dollar" type="number" id="ppa-escalator" name="ppa_escalator"
+                       placeholder="2.9" min="0" max="10" step="0.1" value="2.9">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="ppa-batteries">Number of Batteries <span>(if any)</span></label>
+              <input class="form-input" type="number" id="ppa-batteries" name="ppa_batteries"
+                     placeholder="0" min="0" max="20" step="1" value="0">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="ppa-battery-kwh">Battery Size <span>(kWh each)</span></label>
+              <input class="form-input" type="number" id="ppa-battery-kwh" name="ppa_battery_kwh"
+                     placeholder="10" min="1" max="50" step="0.1" value="10">
             </div>
           </div>
-          <div class="form-group">
-            <label class="form-label" for="ppa-monthly">Current Monthly PPA Payment</label>
-            <div class="input-wrap">
-              <span class="input-prefix">$</span>
-              <input class="form-input form-input--dollar" type="number" id="ppa-monthly" name="ppa_monthly"
-                     placeholder="185" min="10" max="2000" step="1" required>
+
+          <!-- Purchase Fields -->
+          <div class="mode-fields" id="purchase-fields">
+            <div class="form-group">
+              <label class="form-label" for="purchase-system-size">System Size <span>(kW)</span></label>
+              <div class="input-wrap">
+                <span class="input-prefix" style="font-size:12px;">kW</span>
+                <input class="form-input form-input--dollar" type="number" id="purchase-system-size" name="purchase_system_size"
+                       placeholder="8.5" min="1" max="50" step="0.1">
+              </div>
             </div>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="ppa-escalator">Annual Escalator Rate <span>(%)</span></label>
-            <div class="input-wrap">
-              <span class="input-prefix">%</span>
-              <input class="form-input form-input--dollar" type="number" id="ppa-escalator" name="ppa_escalator"
-                     placeholder="2.9" min="0" max="10" step="0.1" value="2.9" required>
+            <div class="form-group">
+              <label class="form-label" for="purchase-loan-amount">Total Loan Amount</label>
+              <div class="input-wrap">
+                <span class="input-prefix">$</span>
+                <input class="form-input form-input--dollar" type="number" id="purchase-loan-amount" name="purchase_loan_amount"
+                       placeholder="35,000" min="1000" max="500000" step="1">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="purchase-apr">Interest Rate (APR %)</label>
+              <div class="input-wrap">
+                <span class="input-prefix">%</span>
+                <input class="form-input form-input--dollar" type="number" id="purchase-apr" name="purchase_apr"
+                       placeholder="6.99" min="0" max="30" step="0.01">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="purchase-term">Loan Term <span>(months)</span></label>
+              <input class="form-input" type="number" id="purchase-term" name="purchase_term"
+                     placeholder="300" min="12" max="600" step="1" value="300">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="purchase-batteries">Number of Batteries <span>(if any)</span></label>
+              <input class="form-input" type="number" id="purchase-batteries" name="purchase_batteries"
+                     placeholder="0" min="0" max="20" step="1" value="0">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="purchase-battery-kwh">Battery Size <span>(kWh each)</span></label>
+              <input class="form-input" type="number" id="purchase-battery-kwh" name="purchase_battery_kwh"
+                     placeholder="10" min="1" max="50" step="0.1" value="10">
             </div>
           </div>
 
           <!-- Divider -->
           <div style="height:1px; background:linear-gradient(90deg, transparent, rgba(46,204,113,0.3), transparent); margin:28px 0;"></div>
 
-          <!-- Ownership Section -->
-          <div class="form-section-label" style="color:var(--green-light);">Ownership Alternative</div>
+          <!-- Ownership Alternative (always shown) -->
+          <div class="form-section-label" style="color:var(--green-light);">Our Ownership Alternative</div>
           <div class="form-group">
             <label class="form-label" for="system-cost">Total System Cost <span>(before incentives)</span></label>
             <div class="input-wrap">
@@ -948,9 +1042,19 @@
             <input class="form-input" type="number" id="loan-term" name="loan_term"
                    placeholder="300" min="12" max="600" step="1" value="300" required>
           </div>
+          <div class="form-group">
+            <label class="form-label" for="own-batteries">Number of Batteries</label>
+            <input class="form-input" type="number" id="own-batteries" name="own_batteries"
+                   placeholder="0" min="0" max="20" step="1" value="0">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="own-battery-kwh">Battery Size <span>(kWh each)</span></label>
+            <input class="form-input" type="number" id="own-battery-kwh" name="own_battery_kwh"
+                   placeholder="10" min="1" max="50" step="0.1" value="10">
+          </div>
 
           <button type="button" class="calc-submit" id="calc-btn" onclick="runCalculator()">
-            Compare PPA vs Ownership &rarr;
+            Compare &amp; Calculate &rarr;
           </button>
           <p class="calc-note">Instant results. No email required.</p>
         </form>
@@ -995,43 +1099,16 @@
 
       <!-- Comparison Cards -->
       <div class="compare-grid" id="compare-cards">
-        <!-- PPA Card -->
+        <!-- Their Deal Card (PPA or Purchase) -->
         <div class="compare-card compare-card--ppa">
           <div class="compare-card__header">
             <span class="compare-card__icon">&#10007;</span>
-            <span id="ppa-header-text">Escalating PPA</span>
+            <span id="their-header-text">Escalating PPA</span>
           </div>
-          <div class="compare-card__body">
-            <div class="compare-card__row">
-              <span class="compare-card__row-label">Year 1 Payment</span>
-              <span class="compare-card__row-value" id="ppa-y1">—</span>
-            </div>
-            <div class="compare-card__row">
-              <span class="compare-card__row-label">Year 5 Payment</span>
-              <span class="compare-card__row-value" id="ppa-y5">—</span>
-            </div>
-            <div class="compare-card__row">
-              <span class="compare-card__row-label">Year 10 Payment</span>
-              <span class="compare-card__row-value" id="ppa-y10">—</span>
-            </div>
-            <div class="compare-card__row">
-              <span class="compare-card__row-label">Year 15 Payment</span>
-              <span class="compare-card__row-value" id="ppa-y15">—</span>
-            </div>
-            <div class="compare-card__row">
-              <span class="compare-card__row-label">Year 20 Payment</span>
-              <span class="compare-card__row-value" id="ppa-y20">—</span>
-            </div>
-            <div class="compare-card__row">
-              <span class="compare-card__row-label">Year 25 Payment</span>
-              <span class="compare-card__row-value" id="ppa-y25">—</span>
-            </div>
-            <div class="compare-card__total">
-              <span class="compare-card__total-label">25-Year Total</span>
-              <span class="compare-card__total-value" id="ppa-total">—</span>
-            </div>
+          <div class="compare-card__body" id="their-card-body">
+            <!-- Populated dynamically by JS -->
           </div>
-          <div class="compare-card__footer">You never own the system</div>
+          <div class="compare-card__footer" id="their-footer">You never own the system</div>
         </div>
         <!-- Ownership Card -->
         <div class="compare-card compare-card--own">
@@ -1189,50 +1266,35 @@
 
   <script>
   /* =================================================================
-     SOLAR CALCULATOR — CONFIGURABLE PRICING MATRIX
-     Edit these values to update all calculations site-wide.
+     SOLAR CALCULATOR — CONFIGURABLE PRICING
      ================================================================= */
   const CONFIG = {
-    // === DEFAULT VALUES (used when user doesn't override) ===
-    defaultSystemCost: 38232,       // $ total system cost before incentives
-    defaultDiscount: 16260.55,      // $ incentive/discount amount
-    defaultApr: 8.79,               // % annual percentage rate
-    defaultLoanTermMonths: 300,     // 25 years (300 months)
-
-    // System pricing (for auto-estimate from bill)
-    costPerWatt: 4.50,              // $/watt — base system cost
-    batteryCost: 13500,             // $ per battery unit
-    batteryKwh: 10,                 // kWh per battery unit
-
-    // Escalating PPA model
-    ppaEscalatorRate: 0.029,        // 2.9% annual increase
-    ppaTermYears: 25,               // 25-year agreement
-
-    // System sizing from bill
-    avgCostPerKwh: 0.20,            // California avg $/kWh
-    kwhPerKwYear: 1500,             // Annual production per kW installed
-
-    // Pricing tiers — PPA year-1 monthly by system size
-    tiers: [
-      { minKw: 0,    maxKw: 2.9,  ppaMo: 70 },
-      { minKw: 3.0,  maxKw: 4.9,  ppaMo: 95 },
-      { minKw: 5.0,  maxKw: 7.4,  ppaMo: 140 },
-      { minKw: 7.5,  maxKw: 9.9,  ppaMo: 185 },
-      { minKw: 10.0, maxKw: 14.0, ppaMo: 245 },
-      { minKw: 14.1, maxKw: 20.0, ppaMo: 320 },
-      { minKw: 20.1, maxKw: 30.0, ppaMo: 420 },
-    ],
-
-    // GHL funnel URL — update when ready
+    defaultSystemCost: 38232,
+    defaultDiscount: 16260.55,
+    defaultApr: 8.79,
+    defaultLoanTermMonths: 300,
+    costPerWatt: 4.50,
+    batteryCost: 13500,
+    batteryKwh: 10,
     ghlFunnelUrl: 'https://getmoresolarquotes.com/submit',
   };
 
   /* =================================================================
+     MODE TOGGLE
+     ================================================================= */
+  let currentMode = 'ppa'; // 'ppa' or 'purchase'
+
+  function setMode(mode) {
+    currentMode = mode;
+    document.getElementById('ppa-fields').classList.toggle('active', mode === 'ppa');
+    document.getElementById('purchase-fields').classList.toggle('active', mode === 'purchase');
+    document.getElementById('mode-ppa-btn').classList.toggle('active', mode === 'ppa');
+    document.getElementById('mode-purchase-btn').classList.toggle('active', mode === 'purchase');
+  }
+
+  /* =================================================================
      CORE CALCULATION FUNCTIONS
      ================================================================= */
-
-  // System size and PPA payment are now direct user inputs
-  // (no more tier-based estimation)
 
   function calcPpaYearlyPayments(startMo, years, rate) {
     const payments = [];
@@ -1255,59 +1317,19 @@
     return principal * (r * Math.pow(1 + r, months)) / (Math.pow(1 + r, months) - 1);
   }
 
-  function runComparison(systemCost, discount, aprPercent, loanTermMonths, ppaMonthlyStart, ppaEscalatorPercent, ppaSystemKw) {
-    // Ownership calculations
-    const priceAfterIncentives = systemCost - discount;
-    const apr = aprPercent / 100;
-    const ownMonthly = calcMonthlyPayment(priceAfterIncentives, apr, loanTermMonths);
-    const totalAmountPaid = ownMonthly * loanTermMonths;
-    const totalInterest = totalAmountPaid - priceAfterIncentives;
-    const loanTermYears = Math.ceil(loanTermMonths / 12);
-
-    // Always display 25 years
-    const displayYears = 25;
-
-    // Build ownership year-by-year (for chart + table)
-    const ownPayments = [];
+  function buildYearlyPayments(monthlyPayment, loanTermMonths, displayYears) {
+    const payments = [];
     for (let y = 1; y <= displayYears; y++) {
       const monthsThisYear = Math.min(12, Math.max(0, loanTermMonths - (y - 1) * 12));
-      const monthly = monthsThisYear > 0 ? ownMonthly : 0;
+      const monthly = monthsThisYear > 0 ? monthlyPayment : 0;
       const annual = monthly * monthsThisYear;
-      ownPayments.push({
+      payments.push({
         year: y,
         monthly: Math.round(monthly * 100) / 100,
         annual: Math.round(annual * 100) / 100,
       });
     }
-
-    // PPA calculations — always use direct inputs
-    const ppaRate = ppaEscalatorPercent / 100;
-    const ppaPayments = calcPpaYearlyPayments(ppaMonthlyStart, displayYears, ppaRate);
-    const ppaTotal = ppaPayments.reduce((sum, p) => sum + p.annual, 0);
-
-    const ownTotal = Math.round(totalAmountPaid);
-    const totalSavings = Math.round(ppaTotal - ownTotal);
-
-    return {
-      systemCost,
-      discount,
-      priceAfterIncentives: Math.round(priceAfterIncentives * 100) / 100,
-      aprPercent,
-      loanTermMonths,
-      loanTermYears,
-      systemKw: ppaSystemKw,
-      ppaStart: ppaMonthlyStart,
-      ppaEscalatorPercent,
-      ppaPayments,
-      ppaTotal: Math.round(ppaTotal),
-      ownMonthly: Math.round(ownMonthly * 100) / 100,
-      ownPayments,
-      ownTotal,
-      totalInterest: Math.round(totalInterest),
-      totalSavings,
-      hasPpa: true,
-      displayYears,
-    };
+    return payments;
   }
 
   /* =================================================================
@@ -1370,10 +1392,13 @@
     const plotW = W - pad.left - pad.right;
     const plotH = H - pad.top - pad.bottom;
 
-    // Find max value for Y axis
-    const maxPpa = data.hasPpa ? data.ppaPayments[data.ppaPayments.length - 1].monthly : 0;
+    // Find max value for Y axis (always compare both sides)
+    var maxTheir = 0;
+    for (var mi = 0; mi < data.ppaPayments.length; mi++) {
+      if (data.ppaPayments[mi].monthly > maxTheir) maxTheir = data.ppaPayments[mi].monthly;
+    }
     const maxOwn = data.ownMonthly;
-    const maxVal = Math.max(maxPpa, maxOwn);
+    const maxVal = Math.max(maxTheir, maxOwn);
     const yMax = Math.ceil(maxVal / 50) * 50 + 50;
 
     function xPos(year) {
@@ -1443,9 +1468,9 @@
       ctx.strokeStyle = 'rgba(255,255,255,0.04)';
       ctx.lineWidth = 1;
       for (let i = 0; i <= 5; i++) {
-        const maxPpa = data.hasPpa ? data.ppaPayments[data.ppaPayments.length - 1].monthly : 0;
-        const maxOwn = data.ownMonthly;
-        const yMax = Math.ceil(Math.max(maxPpa, maxOwn) / 50) * 50 + 50;
+        var maxT = 0;
+        for (var j = 0; j < data.ppaPayments.length; j++) { if (data.ppaPayments[j].monthly > maxT) maxT = data.ppaPayments[j].monthly; }
+        const yMax = Math.ceil(Math.max(maxT, data.ownMonthly) / 50) * 50 + 50;
         const val = (yMax / 5) * i;
         const y = yPos(val);
         ctx.beginPath();
@@ -1454,8 +1479,8 @@
         ctx.stroke();
       }
 
-      // Draw PPA line (red) — only if PPA comparison is active
-      if (pointCount >= 1 && data.hasPpa) {
+      // Draw "their deal" line (red) — always shown
+      if (pointCount >= 1) {
         ctx.beginPath();
         ctx.strokeStyle = '#e74c3c';
         ctx.lineWidth = 3;
@@ -1577,13 +1602,10 @@
     let cumulativeOwn = 0;
     let cumulativePpa = 0;
 
-    // Update table headers based on whether PPA is shown
+    // Update table headers based on mode
+    var theirName = data.hasPpa ? 'PPA' : 'Loan';
     const thead = document.querySelector('.data-table thead tr');
-    if (data.hasPpa) {
-      thead.innerHTML = '<th>Year</th><th>PPA Monthly</th><th>PPA Annual</th><th>Ownership Monthly</th><th>Ownership Annual</th><th>Cumulative Savings</th>';
-    } else {
-      thead.innerHTML = '<th>Year</th><th>Monthly Payment</th><th>Annual Payment</th><th>Cumulative Paid</th>';
-    }
+    thead.innerHTML = '<th>Year</th><th>' + theirName + ' Monthly</th><th>' + theirName + ' Annual</th><th>Ownership Monthly</th><th>Ownership Annual</th><th>Cumulative Savings</th>';
 
     for (let i = 0; i < data.displayYears; i++) {
       const own = data.ownPayments[i];
@@ -1593,25 +1615,17 @@
       if (i >= 5) tr.className = 'row-hidden';
       if (own.monthly === 0) tr.classList.add('row-zero');
 
-      if (data.hasPpa) {
-        const ppa = data.ppaPayments[i];
-        cumulativePpa += ppa.annual;
-        const savings = cumulativePpa - cumulativeOwn;
+      const their = data.ppaPayments[i];
+      cumulativePpa += their.annual;
+      const savings = cumulativePpa - cumulativeOwn;
 
-        tr.innerHTML =
-          '<td>' + (i + 1) + '</td>' +
-          '<td class="val-red">' + fmtMo(ppa.monthly) + '</td>' +
-          '<td class="val-red">' + fmt(ppa.annual) + '</td>' +
-          '<td class="val-green">' + (own.monthly > 0 ? fmtMo(own.monthly) : '$0/mo') + '</td>' +
-          '<td class="val-green">' + (own.annual > 0 ? fmt(own.annual) : '$0') + '</td>' +
-          '<td class="val-savings">' + fmt(savings) + '</td>';
-      } else {
-        tr.innerHTML =
-          '<td>' + (i + 1) + '</td>' +
-          '<td class="val-green">' + (own.monthly > 0 ? fmtMo(own.monthly) : '$0/mo') + '</td>' +
-          '<td class="val-green">' + (own.annual > 0 ? fmt(own.annual) : '$0') + '</td>' +
-          '<td class="val-savings">' + fmt(cumulativeOwn) + '</td>';
-      }
+      tr.innerHTML =
+        '<td>' + (i + 1) + '</td>' +
+        '<td class="val-red">' + fmtMo(their.monthly) + '</td>' +
+        '<td class="val-red">' + fmt(their.annual) + '</td>' +
+        '<td class="val-green">' + (own.monthly > 0 ? fmtMo(own.monthly) : '$0/mo') + '</td>' +
+        '<td class="val-green">' + (own.annual > 0 ? fmt(own.annual) : '$0') + '</td>' +
+        '<td class="val-savings">' + fmt(savings) + '</td>';
 
       tbody.appendChild(tr);
     }
@@ -1640,45 +1654,150 @@
      ================================================================= */
 
   function runCalculator() {
-    // PPA inputs
-    const ppaSizeInput = document.getElementById('ppa-system-size');
-    const ppaMonthlyInput = document.getElementById('ppa-monthly');
-    const ppaEscalatorInput = document.getElementById('ppa-escalator');
+    const displayYears = 25;
 
-    // Ownership inputs
-    const costInput = document.getElementById('system-cost');
-    const discountInput = document.getElementById('discount');
-    const aprInput = document.getElementById('apr');
-    const termInput = document.getElementById('loan-term');
-
-    const ppaSystemKw = parseFloat(ppaSizeInput.value);
-    const ppaMonthlyStart = parseFloat(ppaMonthlyInput.value);
-    const ppaEscalatorPercent = parseFloat(ppaEscalatorInput.value);
-    const systemCost = parseFloat(costInput.value);
-    const discount = parseFloat(discountInput.value);
-    const aprPercent = parseFloat(aprInput.value);
-    const loanTermMonths = parseInt(termInput.value);
-
-    // Validate PPA fields
     function flashError(el) {
       el.focus();
       el.style.borderColor = 'var(--red)';
       el.style.boxShadow = '0 0 0 3px rgba(231,76,60,0.2)';
       setTimeout(function() { el.style.borderColor = ''; el.style.boxShadow = ''; }, 2000);
     }
-    if (!ppaSystemKw || ppaSystemKw <= 0) { flashError(ppaSizeInput); return; }
-    if (!ppaMonthlyStart || ppaMonthlyStart <= 0) { flashError(ppaMonthlyInput); return; }
-    if (isNaN(ppaEscalatorPercent) || ppaEscalatorPercent < 0) { flashError(ppaEscalatorInput); return; }
+
+    // ── Read ownership ("our deal") inputs ──
+    const costInput = document.getElementById('system-cost');
+    const discountInput = document.getElementById('discount');
+    const ownAprInput = document.getElementById('apr');
+    const ownTermInput = document.getElementById('loan-term');
+
+    const systemCost = parseFloat(costInput.value);
+    const discount = parseFloat(discountInput.value);
+    const ownAprPercent = parseFloat(ownAprInput.value);
+    const ownTermMonths = parseInt(ownTermInput.value);
 
     // Validate ownership fields
     if (!systemCost || systemCost <= 0) { flashError(costInput); return; }
     if (isNaN(discount) || discount < 0) { flashError(discountInput); return; }
-    if (!aprPercent || aprPercent <= 0) { flashError(aprInput); return; }
-    if (!loanTermMonths || loanTermMonths <= 0) { flashError(termInput); return; }
+    if (!ownAprPercent || ownAprPercent <= 0) { flashError(ownAprInput); return; }
+    if (!ownTermMonths || ownTermMonths <= 0) { flashError(ownTermInput); return; }
 
-    const data = runComparison(systemCost, discount, aprPercent, loanTermMonths, ppaMonthlyStart, ppaEscalatorPercent, ppaSystemKw);
+    var ownBatteries = parseInt(document.getElementById('own-batteries').value) || 0;
+    var ownBatteryKwh = parseFloat(document.getElementById('own-battery-kwh').value) || 10;
 
-    // Populate stats
+    // ── Calculate ownership ("our deal") ──
+    var priceAfterIncentives = systemCost - discount;
+    var ownMonthly = calcMonthlyPayment(priceAfterIncentives, ownAprPercent / 100, ownTermMonths);
+    var ownTotal = ownMonthly * ownTermMonths;
+    var totalInterest = ownTotal - priceAfterIncentives;
+    var ownTermYears = Math.round(ownTermMonths / 12 * 10) / 10;
+    var ownPayments = buildYearlyPayments(ownMonthly, ownTermMonths, displayYears);
+
+    // ── Read "their deal" inputs (mode-dependent) ──
+    var theirPayments, theirTotal, theirLabel, theirFooter, theirSystemKw,
+        theirBatteries, theirBatteryKwh, theirCardHtml;
+
+    if (currentMode === 'ppa') {
+      // PPA mode
+      var ppaSizeInput = document.getElementById('ppa-system-size');
+      var ppaMonthlyInput = document.getElementById('ppa-monthly');
+      var ppaEscalatorInput = document.getElementById('ppa-escalator');
+
+      var ppaSystemKw = parseFloat(ppaSizeInput.value);
+      var ppaMonthlyStart = parseFloat(ppaMonthlyInput.value);
+      var ppaEscalatorPercent = parseFloat(ppaEscalatorInput.value);
+
+      if (!ppaSystemKw || ppaSystemKw <= 0) { flashError(ppaSizeInput); return; }
+      if (!ppaMonthlyStart || ppaMonthlyStart <= 0) { flashError(ppaMonthlyInput); return; }
+      if (isNaN(ppaEscalatorPercent) || ppaEscalatorPercent < 0) { flashError(ppaEscalatorInput); return; }
+
+      theirBatteries = parseInt(document.getElementById('ppa-batteries').value) || 0;
+      theirBatteryKwh = parseFloat(document.getElementById('ppa-battery-kwh').value) || 10;
+      theirSystemKw = ppaSystemKw;
+
+      theirPayments = calcPpaYearlyPayments(ppaMonthlyStart, displayYears, ppaEscalatorPercent / 100);
+      theirTotal = theirPayments.reduce(function(s, p) { return s + p.annual; }, 0);
+
+      theirLabel = 'Escalating PPA (' + ppaEscalatorPercent + '%/yr)';
+      theirFooter = 'You never own the system';
+
+      theirCardHtml =
+        '<div class="compare-card__row"><span class="compare-card__row-label">Year 1</span><span class="compare-card__row-value">' + fmtMo(theirPayments[0].monthly) + '</span></div>' +
+        '<div class="compare-card__row"><span class="compare-card__row-label">Year 5</span><span class="compare-card__row-value">' + fmtMo(theirPayments[4].monthly) + '</span></div>' +
+        '<div class="compare-card__row"><span class="compare-card__row-label">Year 10</span><span class="compare-card__row-value">' + fmtMo(theirPayments[9].monthly) + '</span></div>' +
+        '<div class="compare-card__row"><span class="compare-card__row-label">Year 15</span><span class="compare-card__row-value">' + fmtMo(theirPayments[14].monthly) + '</span></div>' +
+        '<div class="compare-card__row"><span class="compare-card__row-label">Year 20</span><span class="compare-card__row-value">' + fmtMo(theirPayments[19].monthly) + '</span></div>' +
+        '<div class="compare-card__row"><span class="compare-card__row-label">Year 25</span><span class="compare-card__row-value">' + fmtMo(theirPayments[24].monthly) + '</span></div>' +
+        (theirBatteries > 0 ? '<div class="compare-card__row"><span class="compare-card__row-label">Batteries</span><span class="compare-card__row-value">' + theirBatteries + ' &times; ' + theirBatteryKwh + ' kWh</span></div>' : '') +
+        '<div class="compare-card__total"><span class="compare-card__total-label">25-Year Total</span><span class="compare-card__total-value">' + fmt(theirTotal) + '</span></div>';
+
+    } else {
+      // Purchase / Financed mode
+      var purchSizeInput = document.getElementById('purchase-system-size');
+      var purchLoanInput = document.getElementById('purchase-loan-amount');
+      var purchAprInput = document.getElementById('purchase-apr');
+      var purchTermInput = document.getElementById('purchase-term');
+
+      var purchSystemKw = parseFloat(purchSizeInput.value);
+      var purchLoanAmount = parseFloat(purchLoanInput.value);
+      var purchAprPercent = parseFloat(purchAprInput.value);
+      var purchTermMonths = parseInt(purchTermInput.value);
+
+      if (!purchSystemKw || purchSystemKw <= 0) { flashError(purchSizeInput); return; }
+      if (!purchLoanAmount || purchLoanAmount <= 0) { flashError(purchLoanInput); return; }
+      if (!purchAprPercent || purchAprPercent <= 0) { flashError(purchAprInput); return; }
+      if (!purchTermMonths || purchTermMonths <= 0) { flashError(purchTermInput); return; }
+
+      theirBatteries = parseInt(document.getElementById('purchase-batteries').value) || 0;
+      theirBatteryKwh = parseFloat(document.getElementById('purchase-battery-kwh').value) || 10;
+      theirSystemKw = purchSystemKw;
+
+      var purchMonthly = calcMonthlyPayment(purchLoanAmount, purchAprPercent / 100, purchTermMonths);
+      theirPayments = buildYearlyPayments(purchMonthly, purchTermMonths, displayYears);
+      theirTotal = theirPayments.reduce(function(s, p) { return s + p.annual; }, 0);
+      var purchTotalInterest = (purchMonthly * purchTermMonths) - purchLoanAmount;
+      var purchTermYears = Math.round(purchTermMonths / 12 * 10) / 10;
+
+      theirLabel = 'Current Loan (' + purchAprPercent + '% APR)';
+      theirFooter = 'Loan payoff in ' + purchTermYears + ' years';
+
+      theirCardHtml =
+        '<div class="compare-card__row"><span class="compare-card__row-label">Monthly Payment</span><span class="compare-card__row-value">' + fmtMo(purchMonthly) + '</span></div>' +
+        '<div class="compare-card__row"><span class="compare-card__row-label">Loan Amount</span><span class="compare-card__row-value">' + fmt(purchLoanAmount) + '</span></div>' +
+        '<div class="compare-card__row"><span class="compare-card__row-label">APR</span><span class="compare-card__row-value">' + purchAprPercent + '%</span></div>' +
+        '<div class="compare-card__row"><span class="compare-card__row-label">Loan Term</span><span class="compare-card__row-value">' + purchTermMonths + ' mo (' + purchTermYears + ' yr)</span></div>' +
+        '<div class="compare-card__row"><span class="compare-card__row-label">Total Interest</span><span class="compare-card__row-value">' + fmt(purchTotalInterest) + '</span></div>' +
+        (theirBatteries > 0 ? '<div class="compare-card__row"><span class="compare-card__row-label">Batteries</span><span class="compare-card__row-value">' + theirBatteries + ' &times; ' + theirBatteryKwh + ' kWh</span></div>' : '') +
+        '<div class="compare-card__total"><span class="compare-card__total-label">25-Year Total</span><span class="compare-card__total-value">' + fmt(theirTotal) + '</span></div>';
+    }
+
+    // ── Build unified data object ──
+    var totalSavings = theirTotal - ownTotal;
+
+    var data = {
+      mode: currentMode,
+      hasPpa: currentMode === 'ppa',
+      systemKw: theirSystemKw,
+      theirPayments: theirPayments,
+      theirTotal: theirTotal,
+      systemCost: systemCost,
+      discount: discount,
+      priceAfterIncentives: priceAfterIncentives,
+      ownMonthly: Math.round(ownMonthly * 100) / 100,
+      ownTotal: ownTotal,
+      totalInterest: totalInterest,
+      aprPercent: ownAprPercent,
+      loanTermMonths: ownTermMonths,
+      loanTermYears: ownTermYears,
+      ownPayments: ownPayments,
+      ownBatteries: ownBatteries,
+      ownBatteryKwh: ownBatteryKwh,
+      theirBatteries: theirBatteries,
+      theirBatteryKwh: theirBatteryKwh,
+      totalSavings: totalSavings,
+      displayYears: displayYears,
+      ppaPayments: theirPayments,
+    };
+
+    // ── Populate stat cards ──
     document.getElementById('stat-size').textContent = data.systemKw + ' kW';
     document.getElementById('stat-size').parentElement.querySelector('.stat-card__label').textContent = 'SYSTEM SIZE';
     document.getElementById('stat-size-sub').textContent = 'solar array';
@@ -1687,31 +1806,31 @@
     document.getElementById('stat-cost').parentElement.querySelector('.stat-card__label').textContent = 'AMOUNT FINANCED';
     document.getElementById('stat-cost-sub').textContent = 'after incentives';
 
-    animateValue(document.getElementById('stat-credit'), data.totalSavings, '$', '', 800);
-    document.getElementById('stat-credit').parentElement.querySelector('.stat-card__label').textContent = '25-YEAR SAVINGS';
-    document.getElementById('stat-credit').parentElement.querySelector('.stat-card__sub').textContent = 'vs staying on PPA';
+    if (totalSavings > 0) {
+      animateValue(document.getElementById('stat-credit'), totalSavings, '$', '', 800);
+      document.getElementById('stat-credit').parentElement.querySelector('.stat-card__label').textContent = '25-YEAR SAVINGS';
+      document.getElementById('stat-credit').parentElement.querySelector('.stat-card__sub').textContent = currentMode === 'ppa' ? 'vs staying on PPA' : 'vs current loan';
+    } else {
+      animateValue(document.getElementById('stat-credit'), Math.abs(totalSavings), '$', '', 800);
+      document.getElementById('stat-credit').parentElement.querySelector('.stat-card__label').textContent = '25-YEAR DIFFERENCE';
+      document.getElementById('stat-credit').parentElement.querySelector('.stat-card__sub').textContent = 'additional cost';
+    }
 
     animateValue(document.getElementById('stat-savings'), data.ownMonthly, '$', '/mo', 1000);
-    document.getElementById('stat-savings').parentElement.querySelector('.stat-card__label').textContent = 'OWNERSHIP PAYMENT';
+    document.getElementById('stat-savings').parentElement.querySelector('.stat-card__label').textContent = 'OUR PAYMENT';
     document.getElementById('stat-savings').parentElement.querySelector('.stat-card__sub').textContent = 'fixed monthly';
 
-    // Stagger stat card animations
     document.querySelectorAll('.stat-card').forEach(function(card, i) {
       card.style.animationDelay = (i * 0.1) + 's';
       card.classList.add('animate-stat');
     });
 
-    // PPA card — always shown (user provides PPA details directly)
-    document.getElementById('ppa-header-text').textContent = 'Escalating PPA (' + data.ppaEscalatorPercent + '%/yr)';
-    document.getElementById('ppa-y1').textContent = fmtMo(data.ppaPayments[0].monthly);
-    document.getElementById('ppa-y5').textContent = fmtMo(data.ppaPayments[4].monthly);
-    document.getElementById('ppa-y10').textContent = fmtMo(data.ppaPayments[9].monthly);
-    document.getElementById('ppa-y15').textContent = fmtMo(data.ppaPayments[14].monthly);
-    document.getElementById('ppa-y20').textContent = fmtMo(data.ppaPayments[19].monthly);
-    document.getElementById('ppa-y25').textContent = fmtMo(data.ppaPayments[24].monthly);
-    document.getElementById('ppa-total').textContent = fmt(data.ppaTotal);
+    // ── Populate "Their Deal" comparison card ──
+    document.getElementById('their-header-text').textContent = theirLabel;
+    document.getElementById('their-card-body').innerHTML = theirCardHtml;
+    document.getElementById('their-footer').textContent = theirFooter;
 
-    // Ownership card
+    // ── Populate "Our Deal" (ownership) card ──
     document.getElementById('own-monthly').textContent = fmtMo(data.ownMonthly);
     document.getElementById('own-term').textContent = data.loanTermMonths + ' months (' + data.loanTermYears + ' yr)';
     document.getElementById('own-apr').textContent = data.aprPercent + '%';
@@ -1719,40 +1838,67 @@
     document.getElementById('own-financed').textContent = fmt(data.priceAfterIncentives);
     document.getElementById('own-interest').textContent = fmt(data.totalInterest);
     document.getElementById('own-total').textContent = fmt(data.ownTotal);
-    document.getElementById('own-footer').textContent = 'You own the system after ' + data.loanTermYears + ' years — then $0/mo';
+    document.getElementById('own-footer').textContent = 'You own the system after ' + data.loanTermYears + ' years \u2014 then $0/mo';
 
-    // Savings banner — always show savings vs PPA
-    if (data.totalSavings > 0) {
-      animateValue(document.getElementById('savings-amount'), data.totalSavings, '$', '', 1200);
-      document.querySelector('.savings-banner__text').textContent = 'estimated savings over 25 years by owning vs staying on PPA';
+    // Battery row in ownership card
+    var ownBatteryRow = document.getElementById('own-battery-row');
+    if (ownBatteries > 0) {
+      if (!ownBatteryRow) {
+        var ownBody = document.querySelector('.compare-card--own .compare-card__body');
+        var totalDiv = ownBody.querySelector('.compare-card__total');
+        var battDiv = document.createElement('div');
+        battDiv.className = 'compare-card__row';
+        battDiv.id = 'own-battery-row';
+        battDiv.innerHTML = '<span class="compare-card__row-label">Batteries</span><span class="compare-card__row-value">' + ownBatteries + ' \u00d7 ' + ownBatteryKwh + ' kWh</span>';
+        ownBody.insertBefore(battDiv, totalDiv);
+      } else {
+        ownBatteryRow.querySelector('.compare-card__row-value').innerHTML = ownBatteries + ' \u00d7 ' + ownBatteryKwh + ' kWh';
+      }
+    } else if (ownBatteryRow) {
+      ownBatteryRow.remove();
+    }
+
+    // ── Savings banner ──
+    var savingsLabel = currentMode === 'ppa' ? 'vs staying on PPA' : 'vs current loan';
+    if (totalSavings > 0) {
+      animateValue(document.getElementById('savings-amount'), totalSavings, '$', '', 1200);
+      document.querySelector('.savings-banner__text').textContent = 'estimated savings over 25 years by switching to ownership ' + savingsLabel;
       document.getElementById('savings-banner').classList.add('savings-banner__pulse');
     } else {
-      document.getElementById('savings-amount').textContent = fmt(Math.abs(data.totalSavings));
-      document.querySelector('.savings-banner__text').textContent = 'additional cost of ownership vs PPA over 25 years';
+      document.getElementById('savings-amount').textContent = fmt(Math.abs(totalSavings));
+      document.querySelector('.savings-banner__text').textContent = 'additional cost of ownership ' + savingsLabel + ' over 25 years';
+      document.getElementById('savings-banner').classList.remove('savings-banner__pulse');
     }
     document.getElementById('savings-banner').style.display = '';
 
-    // Tax credit callout — ownership breakdown
+    // ── Tax credit callout ──
     document.getElementById('tax-credit-val').textContent = fmt(data.discount);
-    document.querySelector('.tax-callout__text').innerHTML =
-      'With ownership, your <strong>' + fmt(data.discount) + ' incentive/discount</strong> reduces the system cost from ' +
-      fmt(data.systemCost) + ' to <strong>' + fmt(data.priceAfterIncentives) + '</strong>. ' +
-      'At ' + data.aprPercent + '% APR over ' + data.loanTermMonths + ' months, your fixed payment is <strong>' + fmtMo(data.ownMonthly) + '</strong>. ' +
-      'Meanwhile, your PPA starts at ' + fmtMo(data.ppaStart) + ' and rises to <strong>' + fmtMo(data.ppaPayments[24].monthly) + '</strong> by year 25.' +
-      '<small>Consult your tax professional regarding solar tax credit eligibility. This is not tax advice.</small>';
+    if (currentMode === 'ppa') {
+      document.querySelector('.tax-callout__text').innerHTML =
+        'With ownership, your <strong>' + fmt(data.discount) + ' incentive/discount</strong> reduces the system cost from ' +
+        fmt(data.systemCost) + ' to <strong>' + fmt(data.priceAfterIncentives) + '</strong>. ' +
+        'At ' + data.aprPercent + '% APR over ' + data.loanTermMonths + ' months, your fixed payment is <strong>' + fmtMo(data.ownMonthly) + '</strong>. ' +
+        'Meanwhile, your PPA starts at ' + fmtMo(data.theirPayments[0].monthly) + ' and rises to <strong>' + fmtMo(data.theirPayments[24].monthly) + '</strong> by year 25.' +
+        '<small>Consult your tax professional regarding solar tax credit eligibility. This is not tax advice.</small>';
+    } else {
+      document.querySelector('.tax-callout__text').innerHTML =
+        'By refinancing into ownership, your <strong>' + fmt(data.discount) + ' incentive/discount</strong> reduces the cost from ' +
+        fmt(data.systemCost) + ' to <strong>' + fmt(data.priceAfterIncentives) + '</strong>. ' +
+        'At ' + data.aprPercent + '% APR over ' + data.loanTermMonths + ' months, your new payment is <strong>' + fmtMo(data.ownMonthly) + '</strong>.' +
+        '<small>Consult your tax professional regarding solar tax credit eligibility. This is not tax advice.</small>';
+    }
 
-    // Build table
+    // ── Build table ──
     buildTable(data);
     tableExpanded = false;
     document.getElementById('table-toggle').innerHTML = 'Show All ' + data.displayYears + ' Years &#9660;';
 
-    // Show results
-    const results = document.getElementById('results');
+    // ── Show results ──
+    var results = document.getElementById('results');
     results.style.display = 'block';
     document.getElementById('cta-section').style.display = 'block';
     document.getElementById('disclaimers').style.display = 'block';
 
-    // Trigger animation after display
     requestAnimationFrame(function() {
       requestAnimationFrame(function() {
         results.classList.add('visible');
@@ -1760,32 +1906,29 @@
       });
     });
 
-    // Scroll to results
     setTimeout(function() {
       results.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 200);
 
-    // Update chart labels based on mode
-    if (data.hasPpa) {
-      document.getElementById('chart-title').textContent = 'Monthly Payment Over 25 Years';
-      document.getElementById('chart-sub').textContent = 'Red keeps rising. Green stays flat \u2014 then drops to zero.';
-      document.getElementById('tooltip-ppa-row').style.display = '';
-      document.getElementById('chart-legend-ppa').style.display = '';
-    } else {
-      document.getElementById('chart-title').textContent = 'Your Monthly Payment Over Time';
-      document.getElementById('chart-sub').textContent = 'Fixed monthly payment through your loan term.';
-      document.getElementById('tooltip-ppa-row').style.display = 'none';
-      document.getElementById('chart-legend-ppa').style.display = 'none';
-    }
+    // ── Chart labels ──
+    var theirChartLabel = currentMode === 'ppa' ? 'Escalating PPA' : 'Current Loan';
+    document.getElementById('chart-title').textContent = 'Monthly Payment Over 25 Years';
+    document.getElementById('chart-sub').textContent = currentMode === 'ppa'
+      ? 'Red keeps rising. Green stays flat \u2014 then drops to zero.'
+      : 'Red = current loan. Green = our ownership deal.';
+    document.getElementById('tooltip-ppa-row').style.display = '';
+    document.getElementById('chart-legend-ppa').style.display = '';
+    document.getElementById('chart-legend-ppa').innerHTML =
+      '<div class="chart-legend__dot chart-legend__dot--red"></div>' + theirChartLabel;
 
-    // Draw chart after results are visible
-    setTimeout(function() {
-      drawChart(data);
-    }, 400);
+    document.querySelector('#tooltip-ppa-row .chart-tooltip__label').textContent = currentMode === 'ppa' ? 'PPA' : 'Loan';
 
-    // Update CTA link with params
-    const ctaUrl = CONFIG.ghlFunnelUrl +
-      '?cost=' + encodeURIComponent(data.systemCost) +
+    setTimeout(function() { drawChart(data); }, 400);
+
+    // ── CTA link ──
+    var ctaUrl = CONFIG.ghlFunnelUrl +
+      '?mode=' + encodeURIComponent(currentMode) +
+      '&cost=' + encodeURIComponent(data.systemCost) +
       '&financed=' + encodeURIComponent(data.priceAfterIncentives) +
       '&monthly=' + encodeURIComponent(data.ownMonthly) +
       '&term=' + encodeURIComponent(data.loanTermMonths);
